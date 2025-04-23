@@ -1,0 +1,6 @@
+paho-mqtt
+APScheduler
+requests
+pandas
+numpy
+python-dotenv
