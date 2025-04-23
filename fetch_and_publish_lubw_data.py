@@ -3,6 +3,7 @@ import time
 import json
 import paho.mqtt.publish as publish
 import requests
+from apscheduler.schedulers.blocking import BlockingScheduler
 from requests.auth import AuthBase
 import base64
 import pandas as pd
@@ -82,6 +83,7 @@ def fetch_station_data(station, start_time, end_time):
 
 
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
+    # TODO: works, but needs refactoring :)
     json_str = data.to_json(orient='records')
     payload = json.loads(json_str)[0]
     payload = json.dumps(payload)
@@ -114,13 +116,14 @@ def main():
             for col in df.columns:
                 if col not in ["datetime", "datetime_utc", "unixtime"]:
                     df[col] = df[col].astype(float)  # Ensure float type
+            try:
+                publish_sensor_data(df, f"sensors/lubw-hour/{station}")
+            except:
+                print(f"Could not publish data at {start_time} for {station}")
 
-            publish_sensor_data(df, f"sensors/lubw-hour/{station}")
 
-
-
-
-# Run the main function
-# TODO: Run main function in scedular
 if __name__ == "__main__":
-    main()
+    scheduler = BlockingScheduler()
+    scheduler.add_job(main, 'interval', hours=1, next_run_time=datetime.now())
+    print("Starting scheduler...")
+    scheduler.start()
