@@ -122,7 +122,7 @@ def main():
                 if col not in ["datetime", "datetime_utc", "unixtime"]:
                     df[col] = df[col].astype(float)  # Ensure float type
 
-            publish_sensor_data(df, "sensors/lubw-hour/lubw")
+            publish_sensor_data(df, f"sensors/test-data/{station}")
 
 
 
