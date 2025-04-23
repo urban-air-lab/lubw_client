@@ -1,17 +1,19 @@
 import os
-
+import time
+import json
+import paho.mqtt.publish as publish
 import requests
 from requests.auth import AuthBase
 import base64
 import pandas as pd
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import numpy as np
-from influxdb_client import InfluxDBClient, Point, WriteOptions
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# TODO -env file needed? Can directly encrypt yaml file with all needed? 
 
 class UTF8BasicAuth(AuthBase):
     def __init__(self, username, password):
@@ -31,6 +33,7 @@ station_components = {
     "DEBW152": ['NO2', 'CO']
 }
 
+
 def fetch_station_data(station, start_time, end_time):
     components = station_components.get(station)
     if components is None:
@@ -45,10 +48,10 @@ def fetch_station_data(station, start_time, end_time):
             'station': station
         }
 
-        # TODO: Should never be a next link, since only asked for 1 hour entry
         next_link = None
         while True:
             try:
+                # TODO: sub function
                 response = requests.get(next_link or os.getenv("LUBW_BASE_URL"), params=params, auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
                 response.raise_for_status()
                 response.encoding = 'utf-8'
@@ -57,8 +60,7 @@ def fetch_station_data(station, start_time, end_time):
                 if 'messwerte' not in data or not isinstance(data['messwerte'], list):
                     break
 
-                # TODO: Should always just one entry, since only 1 hour is requested
-                # TODO: No loop needed, no outer dict needed
+                # TODO: sub function
                 for entry in data['messwerte']:
                     dt = entry['endZeit']
                     value = entry['wert']
@@ -66,7 +68,6 @@ def fetch_station_data(station, start_time, end_time):
                         all_data[dt] = {'datetime': dt}
                     all_data[dt][component] = value
 
-                # TODO: Should never be a next link
                 next_link = data.get('nextLink')
                 if not next_link:
                     break
@@ -77,7 +78,7 @@ def fetch_station_data(station, start_time, end_time):
 
     df = pd.DataFrame(list(all_data.values()))
     df['datetime'] = pd.to_datetime(df['datetime'])
-    df = df.sort_values(by='datetime').reset_index(drop=True) #TODO: Not neede when always asked for 1 hour
+    df = df.sort_values(by='datetime').reset_index(drop=True)
     print(df)
     return df
 
@@ -86,6 +87,19 @@ def rename_columns(df, column_mapping):
     existing_columns = {old: new for old, new in column_mapping.items() if old in df.columns}
     df.rename(columns=existing_columns, inplace=True)
     return df
+
+
+def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
+    payload = data.to_json()
+
+    publish.single(
+        topic=topic,
+        payload=payload,
+        hostname="localhost",
+        port=1883
+    )
+
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
 
 
 def main():
@@ -108,53 +122,7 @@ def main():
                 if col not in ["datetime", "datetime_utc", "unixtime"]:
                     df[col] = df[col].astype(float)  # Ensure float type
 
-            # TODO: Send df to Mosquitto to have same route then ual sensors
-            # --- CONFIGURE INFLUXDB CONNECTION ---
-            INFLUXDB_URL = "http://localhost:8086"  # Change if needed
-            INFLUXDB_TOKEN = os.getenv("DOCKER_INFLUXDB_INIT_ADMIN_TOKEN")
-            INFLUXDB_ORG = "urban-air-lab"
-            INFLUXDB_BUCKET = "lubw-hour"
-
-            # --- CONNECT TO INFLUXDB ---
-            client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
-
-            # --- WRITE DATAFRAME TO INFLUXDB ---
-            with client.write_api(write_options=WriteOptions(batch_size=500, flush_interval=10_000)) as write_api:
-                for _, row in df.iterrows():
-                    if station == "DEBW015":
-                        point = (
-                            Point(station)  # Measurement name
-                            .time(row["datetime"])  # Timestamp column
-                            .field("PM10", row["PM10"])
-                            .field("PM2p5", row["PM2.5"])
-                            .field("NO2", row["NO2"])
-                            .field("RLF", row["RLF"])
-                            .field("NSCH", row["NSCH"])
-                            .field("STRG", row["STRG"])
-                            .field("WIV", row["WIV"])
-                            .field("TEMP", row["TEMP"])
-                            .field("O3", row["O3"])
-                            .field("NO", row["NO"])
-                            .field("WIR", row["WIR"])
-                        )
-
-                    elif station == "DEBW152":
-                        point = (
-                            Point(station)  # Measurement name
-                            .time(row["datetime"])  # Timestamp column
-                            .field("NO2", row["NO2"])
-                            .field("CO", row["CO"])
-                        )
-
-                    else:
-                        print(f"Station {station} not mapped for transfer to influx")
-                        break
-
-                    write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=point)
-
-            print("Wait for write to fininsh...")
-            client.close()
-            print("Data successfully written to InfluxDB!")
+            publish_sensor_data(df, "sensors/lubw-hour/lubw")
 
 
 
