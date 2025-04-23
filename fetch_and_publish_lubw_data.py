@@ -84,6 +84,7 @@ def fetch_station_data(station, start_time, end_time):
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     json_str = data.to_json(orient='records')
     payload = json.loads(json_str)[0]
+    payload = json.dumps(payload)
 
     publish.single(
         topic=topic,
