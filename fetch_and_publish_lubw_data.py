@@ -13,8 +13,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# TODO -env file needed? Can directly encrypt yaml file with all needed? 
-
 class UTF8BasicAuth(AuthBase):
     def __init__(self, username, password):
         self.username = username
@@ -83,12 +81,6 @@ def fetch_station_data(station, start_time, end_time):
     return df
 
 
-def rename_columns(df, column_mapping):
-    existing_columns = {old: new for old, new in column_mapping.items() if old in df.columns}
-    df.rename(columns=existing_columns, inplace=True)
-    return df
-
-
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     payload = data.to_json()
 
@@ -98,7 +90,6 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
         hostname="localhost",
         port=1883
     )
-
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
 
 
@@ -122,7 +113,7 @@ def main():
                 if col not in ["datetime", "datetime_utc", "unixtime"]:
                     df[col] = df[col].astype(float)  # Ensure float type
 
-            publish_sensor_data(df, f"sensors/test-data/{station}")
+            publish_sensor_data(df, f"sensors/lubw-hour/{station}")
 
 
 
