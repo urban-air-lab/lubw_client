@@ -118,8 +118,8 @@ def main():
                     df[col] = df[col].astype(float)  # Ensure float type
             try:
                 publish_sensor_data(df, f"sensors/lubw-hour/{station}")
-            except:
-                print(f"Could not publish data at {start_time} for {station}")
+            except Exception as e:
+                print(f"Could not publish data at  time {start_time} for {station}, {e}")
 
 
 if __name__ == "__main__":
