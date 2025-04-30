@@ -1,0 +1,16 @@
+services:
+  lubw-client:
+    image: lubw-client
+    container_name: lubw-client
+    restart: always
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - LUBW_USERNAME=${LUBW_USERNAME}
+      - LUBW_PASSWORD=${LUBW_PASSWORD}
+      - LUBW_BASE_URL=${LUBW_BASE_URL}
+      - MQTT_USERNAME=${MQTT_USERNAME}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - MQTT_SERVER=${MQTT_SERVER}
+      - MQTT_PORT=${MQTT_PORT}
