@@ -11,8 +11,16 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import numpy as np
 from dotenv import load_dotenv
+import logging
+import sys
 
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
 
 class UTF8BasicAuth(AuthBase):
     def __init__(self, username, password):
@@ -72,13 +80,13 @@ def fetch_station_data(station, start_time, end_time):
                     break
 
             except requests.exceptions.RequestException as e:
-                print(f"Error fetching data for {component} at {station}: {e}")
+                logging.info(f"Error fetching data for {component} at {station}: {e}")
                 return None
 
     df = pd.DataFrame(list(all_data.values()))
     df['datetime'] = pd.to_datetime(df['datetime'])
     df = df.sort_values(by='datetime').reset_index(drop=True)
-    print(df)
+    logging.info(df)
     return df
 
 
@@ -94,7 +102,7 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
         hostname="localhost",
         port=1883
     )
-    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
+    logging.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
 
 
 def main():
@@ -119,11 +127,11 @@ def main():
             try:
                 publish_sensor_data(df, f"sensors/lubw-hour/{station}")
             except Exception as e:
-                print(f"Could not publish data at  time {start_time} for {station}, {e}")
+                logging.info(f"Could not publish data at  time {start_time} for {station}, {e}")
 
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
     scheduler.add_job(main, 'interval', hours=1, next_run_time=datetime.now())
-    print("Starting scheduler...")
+    logging.info("Starting scheduler...")
     scheduler.start()
