@@ -99,8 +99,8 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     publish.single(
         topic=topic,
         payload=payload,
-        hostname="mosquitto",
-        port=1883
+        hostname=os.getenv("MQTT_SERVER"),
+        port=int(os.getenv("MQTT_PORT"))
     )
     logging.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
 
