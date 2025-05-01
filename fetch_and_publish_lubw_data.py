@@ -99,7 +99,7 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     publish.single(
         topic=topic,
         payload=payload,
-        hostname="localhost",
+        hostname="mosquitto",
         port=1883
     )
     logging.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
