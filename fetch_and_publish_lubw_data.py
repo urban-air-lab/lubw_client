@@ -48,11 +48,7 @@ def get_config(file_path: str) -> dict:
         logging.error(f"An unexpected error occurred: {e}")
 
 
-station_components = get_config("./stations.yaml")
-
-
-def fetch_station_data(station, start_time, end_time):
-    components = station_components.get(station)
+def fetch_station_data(station, components, start_time, end_time):
     if components is None:
         raise ValueError(f"Unknown station: {station}")
 
@@ -127,8 +123,9 @@ def main():
     start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
+    station_components = get_config("./stations.yaml")
     for station in station_components.keys():
-        df = fetch_station_data(station, start_time_str, end_time_str)
+        df = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
         if df is not None:  # TODO: Invert if clause to fail early
             df['datetime_utc'] = pd.to_datetime(df['datetime']).dt.tz_convert('UTC').dt.strftime('%Y-%m-%dT%H:%M:%S')
             df['unix_time'] = (df['datetime'].astype(np.int64) // 10 ** 9).astype(int)
