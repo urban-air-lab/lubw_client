@@ -23,6 +23,16 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
+def get_timestamps_with_offset():
+    germany_tz = ZoneInfo("Europe/Berlin")
+    end_time = datetime.now(germany_tz)
+    end_time = end_time.replace(minute=0, second=0, microsecond=0)
+    start_time = end_time - timedelta(hours=3)
+    end_time = start_time + timedelta(hours=1)
+    start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
+    end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
+    return end_time_str, start_time_str
+
 
 class UTF8BasicAuth(AuthBase):
     def __init__(self, username, password):
@@ -115,15 +125,9 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
 
 
 def main():
-    germany_tz = ZoneInfo("Europe/Berlin")
-    end_time = datetime.now(germany_tz)
-    end_time = end_time.replace(minute=0, second=0, microsecond=0)
-    start_time = end_time - timedelta(hours=3)
-    end_time = start_time + timedelta(hours=1)  # Erzeugt Zeitversatz von zwei Stunden
-    start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
-    end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
-
+    end_time_str, start_time_str = get_timestamps_with_offset()
     station_components = get_config("./stations.yaml")
+
     for station in station_components.keys():
         df = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
         if df is not None:  # TODO: Invert if clause to fail early
@@ -137,7 +141,7 @@ def main():
             try:
                 publish_sensor_data(df, f"sensors/lubw-hour/{station}")
             except Exception as e:
-                logging.info(f"Could not publish data at  time {start_time} for {station}, {e}")
+                logging.info(f"Could not publish data at  time {start_time_str} for {station}, {e}")
 
 
 if __name__ == "__main__":
