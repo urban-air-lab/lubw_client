@@ -107,6 +107,20 @@ def get_lubw_data(next_link, params):
     return data
 
 
+def convert_values(station_data):
+    for col in station_data.columns:
+        if col not in ["datetime", "datetime_utc", "unixtime"]:
+            station_data[col] = station_data[col].astype(float)  # Ensure float type
+    return station_data
+
+
+def convert_timestamps(station_data):
+    station_data['datetime_utc'] = pd.to_datetime(station_data['datetime']).dt.tz_convert('UTC').dt.strftime(
+        '%Y-%m-%dT%H:%M:%S')
+    station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
+    return station_data
+
+
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     # TODO: works, but needs refactoring :)
     json_str = data.to_json(orient='records')
@@ -133,13 +147,8 @@ def main():
             logging.error(f"No data received from station: {station}")
             return
 
-        station_data['datetime_utc'] = pd.to_datetime(station_data['datetime']).dt.tz_convert('UTC').dt.strftime('%Y-%m-%dT%H:%M:%S')
-        station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
-
-        # --- CONVERT ALL COLUMNS (EXCEPT `datetime`) TO FLOAT ---
-        for col in station_data.columns:
-            if col not in ["datetime", "datetime_utc", "unixtime"]:
-                station_data[col] = station_data[col].astype(float)  # Ensure float type
+        station_data = convert_timestamps(station_data)
+        station_data = convert_values(station_data)
         try:
             publish_sensor_data(station_data, f"sensors/lubw-hour/{station}")
         except Exception as e:
