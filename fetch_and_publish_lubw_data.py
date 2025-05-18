@@ -60,7 +60,7 @@ def fetch_station_data(station, components, start_time, end_time):
     if components is None:
         raise ValueError(f"Unknown station: {station}")
 
-    all_data = {}
+    station_data = {}
     for component in components:
         params = {
             'komponente': component,
@@ -73,7 +73,7 @@ def fetch_station_data(station, components, start_time, end_time):
         while True:
             try:
                 data = get_lubw_data(next_link, params)
-                extract_data(all_data, component, data)
+                extract_data(station_data, component, data)
                 next_link = data.get('nextLink')
                 if not next_link:
                     break
@@ -82,20 +82,19 @@ def fetch_station_data(station, components, start_time, end_time):
                 logging.info(f"Error fetching data for {component} at {station}: {e}")
                 return None
 
-    df = pd.DataFrame(list(all_data.values()))
-    df['datetime'] = pd.to_datetime(df['datetime'])
-    df = df.sort_values(by='datetime').reset_index(drop=True)
-    logging.info(df)
-    return df
+    station_dataframe = pd.DataFrame(list(station_data.values()))
+    station_dataframe['datetime'] = pd.to_datetime(station_dataframe['datetime'])
+    station_dataframe = station_dataframe.sort_values(by='datetime').reset_index(drop=True)
+    return station_dataframe
 
 
-def extract_data(all_data, component, data):
+def extract_data(station_data, component, data):
     for entry in data['messwerte']:
         dt = entry['endZeit']
         value = entry['wert']
-        if dt not in all_data:
-            all_data[dt] = {'datetime': dt}
-        all_data[dt][component] = value
+        if dt not in station_data:
+            station_data[dt] = {'datetime': dt}
+        station_data[dt][component] = value
 
 
 def get_lubw_data(next_link, params):
@@ -103,14 +102,13 @@ def get_lubw_data(next_link, params):
                             auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
     response.raise_for_status()
     response.encoding = 'utf-8'
-    data = response.json()
-    return data
+    return response.json()
 
 
 def convert_values(station_data):
     for col in station_data.columns:
         if col not in ["datetime", "datetime_utc", "unixtime"]:
-            station_data[col] = station_data[col].astype(float)  # Ensure float type
+            station_data[col] = station_data[col].astype(float)
     return station_data
 
 
