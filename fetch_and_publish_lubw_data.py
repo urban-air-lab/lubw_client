@@ -69,9 +69,6 @@ def fetch_station_data(station, start_time, end_time):
         while True:
             try:
                 data = get_lubw_data(next_link, params)
-                if 'messwerte' not in data or not isinstance(data['messwerte'], list):
-                    break
-
                 extract_data(all_data, component, data)
                 next_link = data.get('nextLink')
                 if not next_link:
