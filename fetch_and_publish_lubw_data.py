@@ -13,6 +13,7 @@ import numpy as np
 from dotenv import load_dotenv
 import logging
 import sys
+import yaml
 
 load_dotenv()
 
@@ -21,6 +22,7 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(message)s',
     handlers=[logging.StreamHandler(sys.stdout)]
 )
+
 
 class UTF8BasicAuth(AuthBase):
     def __init__(self, username, password):
@@ -34,11 +36,19 @@ class UTF8BasicAuth(AuthBase):
         return r
 
 
-#TODO: config file
-station_components = {
-    "DEBW015": ['PM10', 'PM2.5', 'NO', 'NO2', 'O3', 'TEMP', 'RLF', 'NSCH', 'STRG', 'WIV', 'WIR'],
-    "DEBW152": ['NO2', 'CO']
-}
+def get_config(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r') as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        logging.error(f"No config found in directory")
+    except IOError:
+        logging.error(f"IOError: An I/O error occurred")
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {e}")
+
+
+station_components = get_config("./stations.yaml")
 
 
 def fetch_station_data(station, start_time, end_time):
@@ -114,13 +124,13 @@ def main():
     end_time = datetime.now(germany_tz)
     end_time = end_time.replace(minute=0, second=0, microsecond=0)
     start_time = end_time - timedelta(hours=3)
-    end_time = start_time + timedelta(hours=1) # Erzeugt Zeitversatz von zwei Stunden
+    end_time = start_time + timedelta(hours=1)  # Erzeugt Zeitversatz von zwei Stunden
     start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
     for station in station_components.keys():
         df = fetch_station_data(station, start_time_str, end_time_str)
-        if df is not None: # TODO: Invert if clause to fail early
+        if df is not None:  # TODO: Invert if clause to fail early
             df['datetime_utc'] = pd.to_datetime(df['datetime']).dt.tz_convert('UTC').dt.strftime('%Y-%m-%dT%H:%M:%S')
             df['unix_time'] = (df['datetime'].astype(np.int64) // 10 ** 9).astype(int)
 
