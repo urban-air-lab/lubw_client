@@ -127,19 +127,23 @@ def main():
     station_components = get_config("./stations.yaml")
 
     for station in station_components.keys():
-        df = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
-        if df is not None:  # TODO: Invert if clause to fail early
-            df['datetime_utc'] = pd.to_datetime(df['datetime']).dt.tz_convert('UTC').dt.strftime('%Y-%m-%dT%H:%M:%S')
-            df['unix_time'] = (df['datetime'].astype(np.int64) // 10 ** 9).astype(int)
+        station_data = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
 
-            # --- CONVERT ALL COLUMNS (EXCEPT `datetime`) TO FLOAT ---
-            for col in df.columns:
-                if col not in ["datetime", "datetime_utc", "unixtime"]:
-                    df[col] = df[col].astype(float)  # Ensure float type
-            try:
-                publish_sensor_data(df, f"sensors/lubw-hour/{station}")
-            except Exception as e:
-                logging.info(f"Could not publish data at  time {start_time_str} for {station}, {e}")
+        if station_data is None:
+            logging.error(f"No data received from station: {station}")
+            return
+
+        station_data['datetime_utc'] = pd.to_datetime(station_data['datetime']).dt.tz_convert('UTC').dt.strftime('%Y-%m-%dT%H:%M:%S')
+        station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
+
+        # --- CONVERT ALL COLUMNS (EXCEPT `datetime`) TO FLOAT ---
+        for col in station_data.columns:
+            if col not in ["datetime", "datetime_utc", "unixtime"]:
+                station_data[col] = station_data[col].astype(float)  # Ensure float type
+        try:
+            publish_sensor_data(station_data, f"sensors/lubw-hour/{station}")
+        except Exception as e:
+            logging.info(f"Could not publish data at  time {start_time_str} for {station}, {e}")
 
 
 if __name__ == "__main__":
