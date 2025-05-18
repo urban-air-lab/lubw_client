@@ -72,14 +72,7 @@ def fetch_station_data(station, start_time, end_time):
                 if 'messwerte' not in data or not isinstance(data['messwerte'], list):
                     break
 
-                # TODO: sub function
-                for entry in data['messwerte']:
-                    dt = entry['endZeit']
-                    value = entry['wert']
-                    if dt not in all_data:
-                        all_data[dt] = {'datetime': dt}
-                    all_data[dt][component] = value
-
+                extract_data(all_data, component, data)
                 next_link = data.get('nextLink')
                 if not next_link:
                     break
@@ -93,6 +86,15 @@ def fetch_station_data(station, start_time, end_time):
     df = df.sort_values(by='datetime').reset_index(drop=True)
     logging.info(df)
     return df
+
+
+def extract_data(all_data, component, data):
+    for entry in data['messwerte']:
+        dt = entry['endZeit']
+        value = entry['wert']
+        if dt not in all_data:
+            all_data[dt] = {'datetime': dt}
+        all_data[dt][component] = value
 
 
 def get_lubw_data(next_link, params):
