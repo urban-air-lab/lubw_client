@@ -24,11 +24,9 @@ logging.basicConfig(
 )
 
 def get_timestamps_with_offset():
-    germany_tz = ZoneInfo("Europe/Berlin")
-    end_time = datetime.now(germany_tz)
-    end_time = end_time.replace(minute=0, second=0, microsecond=0)
-    start_time = end_time - timedelta(hours=3)
-    end_time = start_time + timedelta(hours=1)
+    now = datetime.now(ZoneInfo("Europe/Berlin")).replace(minute=0, second=0, microsecond=0)
+    start_time = now - timedelta(hours=3)
+    end_time = now - timedelta(hours=2)
     start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
     end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
     return end_time_str, start_time_str
