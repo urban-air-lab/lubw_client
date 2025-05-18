@@ -58,12 +58,7 @@ def fetch_station_data(station, start_time, end_time):
         next_link = None
         while True:
             try:
-                # TODO: sub function
-                response = requests.get(next_link or os.getenv("LUBW_BASE_URL"), params=params, auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
-                response.raise_for_status()
-                response.encoding = 'utf-8'
-                data = response.json()
-
+                data = get_lubw_data(next_link, params)
                 if 'messwerte' not in data or not isinstance(data['messwerte'], list):
                     break
 
@@ -88,6 +83,15 @@ def fetch_station_data(station, start_time, end_time):
     df = df.sort_values(by='datetime').reset_index(drop=True)
     logging.info(df)
     return df
+
+
+def get_lubw_data(next_link, params):
+    response = requests.get(next_link or os.getenv("LUBW_BASE_URL"), params=params,
+                            auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
+    response.raise_for_status()
+    response.encoding = 'utf-8'
+    data = response.json()
+    return data
 
 
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
