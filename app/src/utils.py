@@ -81,7 +81,8 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
             except requests.exceptions.RequestException as e:
                 logging.info(f"Error fetching data for {component} at {station}: {e}")
                 return None
-
+    if not station_data:
+        return None
     station_dataframe = pd.DataFrame(list(station_data.values()))
     station_dataframe['datetime'] = pd.to_datetime(station_dataframe['datetime'])
     station_dataframe = station_dataframe.sort_values(by='datetime').reset_index(drop=True)
