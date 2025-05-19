@@ -1,6 +1,7 @@
 import pytest
 import fetch_and_publish_lubw_data
 from fetch_and_publish_lubw_data import *
+import requests
 
 
 def test_timestamp_with_offset_types():
@@ -14,6 +15,12 @@ def test_timestamp_with_offset_format():
     actual = fetch_and_publish_lubw_data.get_timestamps_with_offset()
     datetime.strptime(actual[0], "%Y-%m-%dT%H:%M:%S")
     datetime.strptime(actual[1], "%Y-%m-%dT%H:%M:%S")
+
+
+def test_UTF8BasicAuth():
+    response = requests.Request("GET", url="https://www.google.de", auth=fetch_and_publish_lubw_data.UTF8BasicAuth("user", "password"))
+    request = response.prepare()
+    assert request.headers == {'Authorization': 'Basic dXNlcjpwYXNzd29yZA=='}
 
 
 def test_get_lubw_data_success(mocker):

@@ -34,15 +34,15 @@ def get_timestamps_with_offset() -> tuple[str, str]:
 
 
 class UTF8BasicAuth(AuthBase):
-    def __init__(self, username, password):
+    def __init__(self, username: str, password: str):
         self.username = username
         self.password = password
 
-    def __call__(self, r):
+    def __call__(self, request):
         auth_str = f'{self.username}:{self.password}'
         b64_encoded = base64.b64encode(auth_str.encode('utf-8')).decode('utf-8')
-        r.headers['Authorization'] = f'Basic {b64_encoded}'
-        return r
+        request.headers['Authorization'] = f'Basic {b64_encoded}'
+        return request
 
 
 def get_config(file_path: str) -> dict:
