@@ -1,8 +1,8 @@
-import fetch_and_publish_lubw_data
-from fetch_and_publish_lubw_data import *
+
 import requests
 import pandas as pd
 from datetime import datetime
+from app.src import fetch_and_publish_lubw_data
 
 
 def test_timestamp_with_offset_types():
@@ -41,7 +41,7 @@ def test_fetch_station_data(mocker):
              'wert': 14.14}
         ]
     }
-    mocker.patch("fetch_and_publish_lubw_data.requests.get", return_value=mock_response)
+    mocker.patch("app.src.fetch_and_publish_lubw_data.requests.get", return_value=mock_response)
 
     actual = fetch_and_publish_lubw_data.fetch_station_data("teststation",
                                                             ["PM10"],
@@ -65,10 +65,10 @@ def test_get_lubw_data_success(mocker):
              'wert': 14.14}
         ]
     }
-    mocker.patch("fetch_and_publish_lubw_data.requests.get", return_value=mock_response)
+    mocker.patch("app.src.fetch_and_publish_lubw_data.requests.get", return_value=mock_response)
 
     parameters = {'komponente': 'PM10', 'von': '2025-05-18T17:00:00', 'bis': '2025-05-18T18:00:00', 'station': 'DEBW015'}
 
-    result = get_lubw_data(None, params=parameters)
+    result = fetch_and_publish_lubw_data.get_lubw_data(None, params=parameters)
     assert result == mock_response.json.return_value
 
