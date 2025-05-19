@@ -1,10 +1,8 @@
-import pytest
 import fetch_and_publish_lubw_data
 from fetch_and_publish_lubw_data import *
 import requests
 import pandas as pd
 from datetime import datetime
-import numpy as np
 
 
 def test_timestamp_with_offset_types():
