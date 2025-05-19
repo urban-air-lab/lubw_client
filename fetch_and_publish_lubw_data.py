@@ -57,7 +57,7 @@ def get_config(file_path: str) -> dict:
         logging.error(f"An unexpected error occurred: {e}")
 
 
-def fetch_station_data(station, components, start_time, end_time):
+def fetch_station_data(station: str, components: list, start_time: str, end_time: str) -> pd.DataFrame | None:
     if components is None:
         raise ValueError(f"Unknown station: {station}")
 
@@ -89,7 +89,7 @@ def fetch_station_data(station, components, start_time, end_time):
     return station_dataframe
 
 
-def extract_data(station_data, component, data):
+def extract_data(station_data: dict, component: dict, data: dict):
     for entry in data['messwerte']:
         dt = entry['endZeit']
         value = entry['wert']
@@ -98,7 +98,7 @@ def extract_data(station_data, component, data):
         station_data[dt][component] = value
 
 
-def get_lubw_data(next_link, params):
+def get_lubw_data(next_link: str, params: dict) -> dict:
     response = requests.get(next_link or os.getenv("LUBW_BASE_URL"), params=params,
                             auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
     response.raise_for_status()
@@ -106,14 +106,14 @@ def get_lubw_data(next_link, params):
     return response.json()
 
 
-def convert_values(station_data):
+def convert_values(station_data: pd.DataFrame) -> pd.DataFrame:
     for col in station_data.columns:
         if col not in ["datetime", "datetime_utc", "unixtime"]:
             station_data[col] = station_data[col].astype(float)
     return station_data
 
 
-def convert_timestamps(station_data):
+def convert_timestamps(station_data: pd.DataFrame) -> pd.DataFrame:
     station_data['datetime_utc'] = pd.to_datetime(station_data['datetime']).dt.tz_convert('UTC').dt.strftime(
         '%Y-%m-%dT%H:%M:%S')
     station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
