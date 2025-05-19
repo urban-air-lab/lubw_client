@@ -23,7 +23,8 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
-def get_timestamps_with_offset():
+
+def get_timestamps_with_offset() -> tuple[str, str]:
     now = datetime.now(ZoneInfo("Europe/Berlin")).replace(minute=0, second=0, microsecond=0)
     start_time = now - timedelta(hours=3)
     end_time = now - timedelta(hours=2)
