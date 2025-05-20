@@ -1,6 +1,3 @@
-import logging
-
-from apscheduler.schedulers.blocking import BlockingScheduler
 from app.src.utils import *
 
 
