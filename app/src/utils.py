@@ -61,6 +61,7 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
         raise ValueError(f"Unknown station: {station}")
 
     station_data = {}
+    session = requests.Session()
     for component in components:
         params = {
             'komponente': component,
@@ -72,7 +73,7 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
         next_link = None
         while True:
             try:
-                data = get_lubw_data(next_link, params)
+                data: dict = get_lubw_data(session, next_link, params)
                 extract_data(station_data, component, data)
                 next_link = data.get('nextLink')
                 if not next_link:
@@ -98,9 +99,10 @@ def extract_data(station_data: dict, component: dict, data: dict):
         station_data[dt][component] = value
 
 
-def get_lubw_data(next_link: str, params: dict) -> dict:
-    response = requests.get(next_link or os.getenv("LUBW_BASE_URL"), params=params,
-                            auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
+def get_lubw_data(session: requests.Session, next_link: str, params: dict) -> dict:
+    response = session.get(url=next_link or os.getenv("LUBW_BASE_URL"),
+                           params=params,
+                           auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
     response.raise_for_status()
     response.encoding = 'utf-8'
     return response.json()
