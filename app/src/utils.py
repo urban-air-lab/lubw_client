@@ -46,7 +46,7 @@ class UTF8BasicAuth(AuthBase):
 
 def get_config(file_path: str) -> dict:
     try:
-        with open(file_path, 'r') as file:
+        with open(os.path.join(os.path.dirname(__file__), file_path), 'r') as file:
             return yaml.safe_load(file)
     except FileNotFoundError:
         logging.error(f"No config found in directory")
