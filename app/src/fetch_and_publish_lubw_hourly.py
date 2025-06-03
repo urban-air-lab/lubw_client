@@ -11,7 +11,7 @@ def main():
 
         if station_data is None:
             logging.error(f"No data received from station: {station}")
-            return
+            continue
 
         station_data = convert_timestamps(station_data)
         station_data = convert_values(station_data)
