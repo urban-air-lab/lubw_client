@@ -125,7 +125,7 @@ def convert_timestamps(station_data: pd.DataFrame) -> pd.DataFrame:
 def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
     # TODO: works, but needs refactoring :)
     json_str = data.to_json(orient='records')
-    payload = json.loads(json_str)[0]
+    payload = json.loads(json_str)
     payload = json.dumps(payload)
 
     publish.single(
