@@ -4,7 +4,7 @@ from app.src.utils import *
 def main():
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
     start_time_str = '2024-10-15T00:00:00+01:00'
-    end_time_str = '2025-05-25T00:00:00+01:00'
+    end_time_str = '2025-06-01T15:00:00+01:00'
     date_range = pd.date_range(start=start_time_str, end=end_time_str, freq='h')
     station_components = get_config("./stations.yaml")
 
