@@ -133,6 +133,7 @@ def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
         payload=payload,
         hostname=os.getenv("MQTT_SERVER"),
         port=int(os.getenv("MQTT_PORT")),
-        auth={'username': os.getenv("MQTT_USERNAME"), 'password': os.getenv("MQTT_PASSWORD")}
+        auth={'username': os.getenv("MQTT_USERNAME"), 'password': os.getenv("MQTT_PASSWORD")},
+        qos=2
     )
     logging.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
