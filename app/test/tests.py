@@ -1,6 +1,6 @@
-import requests
-import pandas as pd
-from datetime import datetime
+from unittest import mock
+from unittest.mock import Mock
+
 from app.src.utils import *
 
 
@@ -28,8 +28,9 @@ def test_get_config():
     assert actual["test"] == "value"
 
 
-def test_fetch_station_data(mocker):
-    mock_response = mocker.Mock()
+@mock.patch("app.test.tests.requests.sessions.Session.get")
+def test_fetch_station_data(response_mock):
+    mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
         'station': 'Heilbronn',
@@ -40,20 +41,21 @@ def test_fetch_station_data(mocker):
              'wert': 14.14}
         ]
     }
-    mocker.patch("app.src.utils.requests.get", return_value=mock_response)
+    response_mock.return_value = mock_response
 
     actual = fetch_station_data("teststation",
-                                                            ["PM10"],
-                                                            '2025-05-18T17:00:00+01:00',
-                                                            '2025-05-18T18:00:00+01:00')
+                            ["PM10"],
+                            '2025-05-18T17:00:00+01:00',
+                            '2025-05-18T18:00:00+01:00')
 
     expected = pd.DataFrame({"datetime": pd.Timestamp("2025-05-18T18:00:00+01:00"),
                              "PM10": 14.14}, index=[0])
     pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
 
 
-def test_get_lubw_data_success(mocker):
-    mock_response = mocker.Mock()
+@mock.patch("app.test.tests.requests.sessions.Session.get")
+def test_get_lubw_data_success(response_mock):
+    mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
         'station': 'Heilbronn',
@@ -64,10 +66,10 @@ def test_get_lubw_data_success(mocker):
              'wert': 14.14}
         ]
     }
-    mocker.patch("app.src.utils.requests.get", return_value=mock_response)
+    response_mock.return_value = mock_response
 
     parameters = {'komponente': 'PM10', 'von': '2025-05-18T17:00:00', 'bis': '2025-05-18T18:00:00', 'station': 'DEBW015'}
 
-    result = get_lubw_data(None, params=parameters)
+    result = get_lubw_data(session=requests.Session(), params=parameters, next_link=None)
     assert result == mock_response.json.return_value
 
