@@ -1,6 +1,8 @@
+import inspect
 import os
 import time
 import json
+from pathlib import Path
 import paho.mqtt.publish as publish
 import requests
 from requests.auth import AuthBase
@@ -44,16 +46,25 @@ class UTF8BasicAuth(AuthBase):
         return request
 
 
-def get_config(file_path: str) -> dict:
+def get_config(file: str) -> dict:
+    os_independent_path = _get_caller_directory(2) / Path(file)
     try:
-        with open(os.path.join(os.path.dirname(__file__), file_path), 'r') as file:
+        with open(os_independent_path, 'r') as file:
             return yaml.safe_load(file)
     except FileNotFoundError:
         logging.error(f"No config found in directory")
+        raise
     except IOError:
         logging.error(f"IOError: An I/O error occurred")
+        raise
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
+        raise
+
+
+def _get_caller_directory(stack_position: int) -> Path:
+    caller_file = inspect.stack()[stack_position].filename
+    return Path(caller_file).parent
 
 
 def fetch_station_data(station: str, components: list, start_time: str, end_time: str) -> pd.DataFrame | None:
