@@ -1,6 +1,8 @@
 from unittest import mock
 from unittest.mock import Mock
 
+import pytest
+
 from app.src.utils import *
 
 
@@ -26,6 +28,14 @@ def test_UTF8BasicAuth():
 def test_get_config():
     actual = get_config("./test.yaml")
     assert actual["test"] == "value"
+
+def test_fetch_station_data_wrong_time():
+    with pytest.raises(ValueError) as e:
+        fetch_station_data("teststation",
+                                ["PM10"],
+                                '2025-10-18T17:00:00+01:00',
+                                '2025-05-18T18:00:00+01:00')
+    assert "Start time must be before end time: 2025-10-18T17:00:00+01:00" in str(e)
 
 
 @mock.patch("app.test.tests.requests.sessions.Session.get")
