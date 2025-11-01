@@ -1,0 +1,15 @@
+DEBW015:
+  - 'PM10'
+  - 'PM2.5'
+  - 'NO'
+  - 'NO2'
+  - 'O3'
+  - 'TEMP'
+  - 'RLF'
+  - 'NSCH'
+  - 'STRG'
+  - 'WIV'
+  - 'WIR'
+DEBW152:
+  - 'NO2'
+  - 'CO'
