@@ -2,9 +2,9 @@ name: Publish Docker image
 
 on:
   push:
-    branches:
-      - main
-      - feature/dockerized-lubw-client
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
