@@ -68,8 +68,8 @@ def _get_caller_directory(stack_position: int) -> Path:
 
 
 def fetch_station_data(station: str, components: list, start_time: str, end_time: str) -> pd.DataFrame | None:
-    if components is None:
-        raise ValueError(f"Unknown station: {station}")
+    if start_time > end_time:
+        raise ValueError(f"Start time must be before end time: {start_time}")
 
     station_data = {}
     session = requests.Session()
