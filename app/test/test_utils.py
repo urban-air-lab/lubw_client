@@ -38,7 +38,7 @@ def test_fetch_station_data_wrong_time():
     assert "Start time must be before end time: 2025-10-18T17:00:00+01:00" in str(e)
 
 
-@mock.patch("app.test.tests.requests.sessions.Session.get")
+@mock.patch("app.test.test_utils.requests.sessions.Session.get")
 def test_fetch_station_data(response_mock):
     mock_response = Mock()
     mock_response.status_code = 200
@@ -63,7 +63,7 @@ def test_fetch_station_data(response_mock):
     pd.testing.assert_frame_equal(actual, expected, check_dtype=False)
 
 
-@mock.patch("app.test.tests.requests.sessions.Session.get")
+@mock.patch("app.test.test_utils.requests.sessions.Session.get")
 def test_get_lubw_data_success(response_mock):
     mock_response = Mock()
     mock_response.status_code = 200
