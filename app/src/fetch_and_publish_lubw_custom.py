@@ -1,10 +1,12 @@
+from ual.mqtt.mqtt_client import MQTTClient
+
 from app.src.utils import *
 
 
-def main():
+def main(mqtt_client: MQTTClient) -> None:
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
-    start_time_str = '2024-10-15T00:00:00+01:00'
-    end_time_str = '2025-06-12T21:00:00+01:00'
+    start_time_str = '2025-10-02T00:00:00+01:00'
+    end_time_str = '2025-10-31T21:00:00+01:00'
     date_range = pd.date_range(start=start_time_str, end=end_time_str, freq='h')
     station_components = get_config("./stations.yaml")
 
@@ -23,14 +25,16 @@ def main():
 
             station_data = convert_timestamps(station_data)
             station_data = convert_values(station_data)
-            try:
-                publish_sensor_data(station_data, f"sensors/lubw-hour/{station}")
-            except Exception as e:
-                logging.info(f"Could not publish data at  time {start_time_str} for {station}, {e}")
+            station_data["datetime"] = station_data["datetime"].astype(str)
+            station_data = station_data.to_dict(orient="records")
+            for element in station_data:
+                mqtt_client.publish_data(element, f"sensors/lubw-hour/{station}")
 
     logging.info("Finished fetching data")
 
 
 if __name__ == "__main__":
-    main()
+    mqtt_client: MQTTClient = MQTTClient(os.getenv("MQTT_SERVER"), int(os.getenv("MQTT_PORT")),
+                                         os.getenv("MQTT_USERNAME"), os.getenv("MQTT_PASSWORD"))
+    main(mqtt_client)
 
