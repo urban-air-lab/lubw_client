@@ -14,4 +14,8 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "pyyaml>=6.0.3",
     "requests>=2.32.5",
+    "ual",
 ]
+
+[tool.uv.sources]
+ual = { git = "https://github.com/urban-air-lab/common" }
