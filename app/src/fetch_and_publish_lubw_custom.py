@@ -5,8 +5,8 @@ from app.src.utils import *
 
 def main(mqtt_client: MQTTClient) -> None:
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
-    start_time_str = '2025-10-02T00:00:00+01:00'
-    end_time_str = '2025-10-31T21:00:00+01:00'
+    start_time_str = '2026-02-11T00:00:00+01:00'
+    end_time_str = '2026-02-22T07:00:00+01:00'
     date_range = pd.date_range(start=start_time_str, end=end_time_str, freq='h')
     station_components = get_config("./stations.yaml")
 
@@ -29,6 +29,7 @@ def main(mqtt_client: MQTTClient) -> None:
             station_data = station_data.to_dict(orient="records")
             for element in station_data:
                 mqtt_client.publish_data(element, f"sensors/lubw-hour/{station}")
+        mqtt_client.stop()
 
     logging.info("Finished fetching data")
 
