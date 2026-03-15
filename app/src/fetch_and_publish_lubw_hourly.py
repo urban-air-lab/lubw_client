@@ -29,6 +29,6 @@ def main():
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'interval', hours=1, next_run_time=datetime.now())
+    scheduler.add_job(main, 'cron', minute=0)
     logging.info("Starting scheduler...")
     scheduler.start()
