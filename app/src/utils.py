@@ -26,6 +26,9 @@ logging.basicConfig(
 
 
 def get_timestamps_with_offset() -> tuple[str, str]:
+    '''
+    client calls LUBW API with a offset of 2 hours, since LUBW data has a delay
+    '''
     now = datetime.now(ZoneInfo("Europe/Berlin")).replace(minute=0, second=0, microsecond=0)
     start_time = now - timedelta(hours=3)
     end_time = now - timedelta(hours=2)
