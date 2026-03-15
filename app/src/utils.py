@@ -131,20 +131,3 @@ def convert_timestamps(station_data: pd.DataFrame) -> pd.DataFrame:
         '%Y-%m-%dT%H:%M:%S')
     station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
     return station_data
-
-
-def publish_sensor_data(data: pd.DataFrame, topic: str) -> None:
-    # TODO: works, but needs refactoring :)
-    json_str = data.to_json(orient='records')
-    payload = json.loads(json_str)
-    payload = json.dumps(payload)
-
-    publish.single(
-        topic=topic,
-        payload=payload,
-        hostname=os.getenv("MQTT_SERVER"),
-        port=int(os.getenv("MQTT_PORT")),
-        auth={'username': os.getenv("MQTT_USERNAME"), 'password': os.getenv("MQTT_PASSWORD")},
-        qos=2
-    )
-    logging.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Published to {topic}: {payload}")
