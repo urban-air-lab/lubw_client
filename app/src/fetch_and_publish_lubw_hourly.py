@@ -25,7 +25,6 @@ def main():
         station_data = station_data.to_dict(orient="records")
         for element in station_data:
             mqtt_client.publish_data(element, f"sensors/lubw-hour/{station}")
-        mqtt_client.stop()
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler()
