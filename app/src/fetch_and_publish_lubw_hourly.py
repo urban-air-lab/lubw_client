@@ -1,8 +1,12 @@
+import logging
+import os
+
 from apscheduler.schedulers.blocking import BlockingScheduler
 from ual.mqtt.mqtt_client import MQTTClient
-import os
-import logging
-from app.src.utils import get_config, get_timestamps_with_offset, fetch_station_data, convert_timestamps, convert_values
+
+from app.src.utils import (convert_timestamps, convert_values,
+                           fetch_station_data, get_config,
+                           get_timestamps_with_offset)
 
 
 def main():
