@@ -9,13 +9,8 @@ from app.src.utils import (convert_timestamps, convert_values,
                            get_timestamps_with_offset)
 
 
-def main():
+def main(mqtt_client: MQTTClient, station_components):
     end_time_str, start_time_str = get_timestamps_with_offset()
-    station_components = get_config("./stations.yaml")
-    # TODO: Dont generate everytime, give as parameter
-    mqtt_client: MQTTClient = MQTTClient(os.getenv("MQTT_SERVER"), int(os.getenv("MQTT_PORT")),
-                                         os.getenv("MQTT_USERNAME"), os.getenv("MQTT_PASSWORD"))
-
 
     for station in station_components.keys():
         station_data = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
@@ -32,7 +27,11 @@ def main():
             mqtt_client.publish_data(element, f"sensors/lubw-hour/{station}")
 
 if __name__ == "__main__":
+    station_components = get_config("./stations.yaml")
+    mqtt_client: MQTTClient = MQTTClient(os.getenv("MQTT_SERVER"), int(os.getenv("MQTT_PORT")),
+                                         os.getenv("MQTT_USERNAME"), os.getenv("MQTT_PASSWORD"))
+
     scheduler = BlockingScheduler()
-    scheduler.add_job(main, 'cron', minute=0)
+    scheduler.add_job(main, 'cron', minute=0, args=[mqtt_client, station_components])
     logging.info("Starting scheduler...")
     scheduler.start()
