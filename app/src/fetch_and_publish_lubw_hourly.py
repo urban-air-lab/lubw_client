@@ -1,18 +1,24 @@
-import logging
+
 import os
 
 from apscheduler.schedulers.blocking import BlockingScheduler
+from ual.logging import get_logger
 from ual.mqtt.mqtt_client import MQTTClient
 
-from app.src.utils import (convert_timestamps, convert_values,
-                           fetch_station_data, get_config,
-                           get_timestamps_with_offset)
+from app.src.utils import (
+    convert_timestamps,
+    convert_values,
+    fetch_station_data,
+    get_config,
+    get_timestamps_with_offset,
+)
 
+logging = get_logger()
 
 def main(mqtt_client: MQTTClient, station_components):
     end_time_str, start_time_str = get_timestamps_with_offset()
 
-    for station in station_components.keys():
+    for station in station_components:
         station_data = fetch_station_data(station, station_components[station], start_time_str, end_time_str)
 
         if station_data is None:

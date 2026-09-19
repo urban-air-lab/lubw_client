@@ -1,14 +1,21 @@
-import logging
+
 import os
 
 import pandas as pd
+from ual.logging import get_logger
 from ual.mqtt.mqtt_client import MQTTClient
 
-from app.src.utils import (convert_timestamps, convert_values,
-                           fetch_station_data, get_config)
+from app.src.utils import (
+    convert_timestamps,
+    convert_values,
+    fetch_station_data,
+    get_config,
+)
 
 
 def main(mqtt_client: MQTTClient) -> None:
+    logging = get_logger()
+
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
     start_time_str = '2026-02-11T00:00:00+01:00'
     end_time_str = '2026-02-22T07:00:00+01:00'
@@ -21,7 +28,7 @@ def main(mqtt_client: MQTTClient) -> None:
     logging.info(f"start fetching lubw data from {start_time_str} to {end_time_str}")
 
     for chunk in chunks:
-        for station in station_components.keys():
+        for station in station_components:
             station_data = fetch_station_data(station, station_components[station], chunk[0], chunk[-1])
 
             if station_data is None:

@@ -1,8 +1,6 @@
 import base64
 import inspect
-import logging
 import os
-import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -13,14 +11,11 @@ import requests
 import yaml
 from dotenv import load_dotenv
 from requests.auth import AuthBase
+from ual.logging import get_logger
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s %(message)s',
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
+logging = get_logger()
 
 
 def get_timestamps_with_offset() -> tuple[str, str]:
@@ -50,12 +45,12 @@ class UTF8BasicAuth(AuthBase):
 def get_config(file: str) -> dict:
     os_independent_path = _get_caller_directory(2) / Path(file)
     try:
-        with open(os_independent_path, 'r') as file:
-            return yaml.safe_load(file)
+        with open(os_independent_path, 'r') as f:
+            return yaml.safe_load(f)
     except FileNotFoundError:
         logging.error("No config found in directory")
         raise
-    except IOError:
+    except OSError:
         logging.error("IOError: An I/O error occurred")
         raise
     except Exception as e:

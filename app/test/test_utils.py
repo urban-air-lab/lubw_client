@@ -1,13 +1,19 @@
 from datetime import datetime
 from unittest import mock
 from unittest.mock import Mock
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pytest
 import requests
 
-from app.src.utils import (UTF8BasicAuth, fetch_station_data, get_config,
-                           get_lubw_data, get_timestamps_with_offset)
+from app.src.utils import (
+    UTF8BasicAuth,
+    fetch_station_data,
+    get_config,
+    get_lubw_data,
+    get_timestamps_with_offset,
+)
 
 
 def test_timestamp_with_offset_types():
@@ -19,8 +25,8 @@ def test_timestamp_with_offset_types():
 
 def test_timestamp_with_offset_format():
     actual = get_timestamps_with_offset()
-    datetime.strptime(actual[0], "%Y-%m-%dT%H:%M:%S")
-    datetime.strptime(actual[1], "%Y-%m-%dT%H:%M:%S")
+    datetime.strptime(actual[0], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=ZoneInfo("Europe/Berlin"))
+    datetime.strptime(actual[1], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=ZoneInfo("Europe/Berlin"))
 
 
 def test_UTF8BasicAuth():
