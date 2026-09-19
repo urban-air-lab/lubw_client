@@ -1,4 +1,3 @@
-
 import os
 
 import pandas as pd
@@ -17,19 +16,23 @@ def main(mqtt_client: MQTTClient) -> None:
     logging = get_logger()
 
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
-    start_time_str = '2026-02-11T00:00:00+01:00'
-    end_time_str = '2026-02-22T07:00:00+01:00'
-    date_range = pd.date_range(start=start_time_str, end=end_time_str, freq='h')
+    start_time_str = "2026-02-11T00:00:00+01:00"
+    end_time_str = "2026-02-22T07:00:00+01:00"
+    date_range = pd.date_range(start=start_time_str, end=end_time_str, freq="h")
     station_components = get_config("./stations.yaml")
 
     chunk_size = 100
-    chunks = [date_range[i:i + chunk_size] for i in range(0, len(date_range), chunk_size)]
+    chunks = [
+        date_range[i : i + chunk_size] for i in range(0, len(date_range), chunk_size)
+    ]
 
     logging.info(f"start fetching lubw data from {start_time_str} to {end_time_str}")
 
     for chunk in chunks:
         for station in station_components:
-            station_data = fetch_station_data(station, station_components[station], chunk[0], chunk[-1])
+            station_data = fetch_station_data(
+                station, station_components[station], chunk[0], chunk[-1]
+            )
 
             if station_data is None:
                 logging.error(f"No data received from station: {station}")
@@ -47,7 +50,10 @@ def main(mqtt_client: MQTTClient) -> None:
 
 
 if __name__ == "__main__":
-    mqtt_client: MQTTClient = MQTTClient(os.getenv("MQTT_SERVER"), int(os.getenv("MQTT_PORT")),
-                                         os.getenv("MQTT_USERNAME"), os.getenv("MQTT_PASSWORD"))
+    mqtt_client: MQTTClient = MQTTClient(
+        os.getenv("MQTT_SERVER"),
+        int(os.getenv("MQTT_PORT")),
+        os.getenv("MQTT_USERNAME"),
+        os.getenv("MQTT_PASSWORD"),
+    )
     main(mqtt_client)
-

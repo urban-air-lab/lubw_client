@@ -19,14 +19,16 @@ logging = get_logger()
 
 
 def get_timestamps_with_offset() -> tuple[str, str]:
-    '''
+    """
     client calls LUBW API with a offset of 2 hours, since LUBW data has a delay
-    '''
-    now = datetime.now(ZoneInfo("Europe/Berlin")).replace(minute=0, second=0, microsecond=0)
+    """
+    now = datetime.now(ZoneInfo("Europe/Berlin")).replace(
+        minute=0, second=0, microsecond=0
+    )
     start_time = now - timedelta(hours=3)
     end_time = now - timedelta(hours=2)
-    start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
-    end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
+    start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")
+    end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%S")
     return end_time_str, start_time_str
 
 
@@ -36,16 +38,16 @@ class UTF8BasicAuth(AuthBase):
         self.password = password
 
     def __call__(self, request):
-        auth_str = f'{self.username}:{self.password}'
-        b64_encoded = base64.b64encode(auth_str.encode('utf-8')).decode('utf-8')
-        request.headers['Authorization'] = f'Basic {b64_encoded}'
+        auth_str = f"{self.username}:{self.password}"
+        b64_encoded = base64.b64encode(auth_str.encode("utf-8")).decode("utf-8")
+        request.headers["Authorization"] = f"Basic {b64_encoded}"
         return request
 
 
 def get_config(file: str) -> dict:
     os_independent_path = _get_caller_directory(2) / Path(file)
     try:
-        with open(os_independent_path, 'r') as f:
+        with open(os_independent_path, "r") as f:
             return yaml.safe_load(f)
     except FileNotFoundError:
         logging.error("No config found in directory")
@@ -63,7 +65,9 @@ def _get_caller_directory(stack_position: int) -> Path:
     return Path(caller_file).parent
 
 
-def fetch_station_data(station: str, components: list, start_time: str, end_time: str) -> pd.DataFrame | None:
+def fetch_station_data(
+    station: str, components: list, start_time: str, end_time: str
+) -> pd.DataFrame | None:
     if start_time > end_time:
         raise ValueError(f"Start time must be before end time: {start_time}")
 
@@ -71,10 +75,10 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
     session = requests.Session()
     for component in components:
         params = {
-            'komponente': component,
-            'von': start_time,
-            'bis': end_time,
-            'station': station
+            "komponente": component,
+            "von": start_time,
+            "bis": end_time,
+            "station": station,
         }
 
         next_link = None
@@ -82,7 +86,7 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
             try:
                 data: dict = get_lubw_data(session, next_link, params)
                 extract_data(station_data, component, data)
-                next_link = data.get('nextLink')
+                next_link = data.get("nextLink")
                 if not next_link:
                     break
 
@@ -92,26 +96,30 @@ def fetch_station_data(station: str, components: list, start_time: str, end_time
     if not station_data:
         return None
     station_dataframe = pd.DataFrame(list(station_data.values()))
-    station_dataframe['datetime'] = pd.to_datetime(station_dataframe['datetime'])
-    station_dataframe = station_dataframe.sort_values(by='datetime').reset_index(drop=True)
+    station_dataframe["datetime"] = pd.to_datetime(station_dataframe["datetime"])
+    station_dataframe = station_dataframe.sort_values(by="datetime").reset_index(
+        drop=True
+    )
     return station_dataframe
 
 
 def extract_data(station_data: dict, component: dict, data: dict):
-    for entry in data['messwerte']:
-        dt = entry['endZeit']
-        value = entry['wert']
+    for entry in data["messwerte"]:
+        dt = entry["endZeit"]
+        value = entry["wert"]
         if dt not in station_data:
-            station_data[dt] = {'datetime': dt}
+            station_data[dt] = {"datetime": dt}
         station_data[dt][component] = value
 
 
 def get_lubw_data(session: requests.Session, next_link: str, params: dict) -> dict:
-    response = session.get(url=next_link or os.getenv("LUBW_BASE_URL"),
-                           params=params,
-                           auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")))
+    response = session.get(
+        url=next_link or os.getenv("LUBW_BASE_URL"),
+        params=params,
+        auth=UTF8BasicAuth(os.getenv("LUBW_USERNAME"), os.getenv("LUBW_PASSWORD")),
+    )
     response.raise_for_status()
-    response.encoding = 'utf-8'
+    response.encoding = "utf-8"
     return response.json()
 
 
@@ -123,7 +131,12 @@ def convert_values(station_data: pd.DataFrame) -> pd.DataFrame:
 
 
 def convert_timestamps(station_data: pd.DataFrame) -> pd.DataFrame:
-    station_data['datetime_utc'] = pd.to_datetime(station_data['datetime']).dt.tz_convert('UTC').dt.strftime(
-        '%Y-%m-%dT%H:%M:%S')
-    station_data['unix_time'] = (station_data['datetime'].astype(np.int64) // 10 ** 9).astype(int)
+    station_data["datetime_utc"] = (
+        pd.to_datetime(station_data["datetime"])
+        .dt.tz_convert("UTC")
+        .dt.strftime("%Y-%m-%dT%H:%M:%S")
+    )
+    station_data["unix_time"] = (
+        station_data["datetime"].astype(np.int64) // 10**9
+    ).astype(int)
     return station_data
