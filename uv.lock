@@ -482,7 +482,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "apscheduler", specifier = ">=3.11.2" },
+    { name = "apscheduler", specifier = ">=3.11.3" },
     { name = "isort", specifier = ">=9.0.1" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "numpy", specifier = ">=2.4.6" },

@@ -5,7 +5,7 @@ description = "client to call sensor data from Landesamt für Umwelt Baden Würr
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "apscheduler>=3.11.2",
+    "apscheduler>=3.11.3",
     "isort>=9.0.1",
     "mypy>= 2.3.1",
     "numpy>= 2.4.6",
