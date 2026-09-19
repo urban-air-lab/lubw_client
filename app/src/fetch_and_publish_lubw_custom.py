@@ -4,8 +4,12 @@ import pandas as pd
 from ual.logging import get_logger
 from ual.mqtt.mqtt_client import MQTTClient
 
-from app.src.utils import (convert_timestamps, convert_values,
-                           fetch_station_data, get_config)
+from app.src.utils import (
+    convert_timestamps,
+    convert_values,
+    fetch_station_data,
+    get_config,
+)
 
 
 def main(mqtt_client: MQTTClient) -> None:

@@ -7,8 +7,13 @@ import pandas as pd
 import pytest
 import requests
 
-from app.src.utils import (UTF8BasicAuth, fetch_station_data, get_config,
-                           get_lubw_data, get_timestamps_with_offset)
+from app.src.utils import (
+    UTF8BasicAuth,
+    fetch_station_data,
+    get_config,
+    get_lubw_data,
+    get_timestamps_with_offset,
+)
 
 
 def test_timestamp_with_offset_types():
