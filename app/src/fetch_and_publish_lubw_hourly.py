@@ -12,7 +12,7 @@ from app.src.utils import (
     get_timestamps_with_offset,
 )
 
-logging = get_logger()
+logging = get_logger("lubw_client.fetch_and_publish_lubw_hourly.py")
 
 
 def main(mqtt_client: MQTTClient, station_components):

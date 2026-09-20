@@ -13,7 +13,7 @@ from app.src.utils import (
 
 
 def main(mqtt_client: MQTTClient) -> None:
-    logging = get_logger()
+    logging = get_logger("lubw_client.fetch_and_publish_lubw_custom.py")
 
     # date format '%Y-%m-%dT%H:%M:%S' -> '2025-05-10T00:00:00+01:00'
     start_time_str = "2026-02-11T00:00:00+01:00"

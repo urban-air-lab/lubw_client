@@ -15,7 +15,7 @@ from ual.logging import get_logger
 
 load_dotenv()
 
-logging = get_logger()
+logging = get_logger("lubw_client.utils")
 
 
 def get_timestamps_with_offset() -> tuple[str, str]:
