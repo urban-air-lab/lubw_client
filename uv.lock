@@ -274,17 +274,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dotenv"
-version = "0.9.9"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "python-dotenv" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/b7/545d2c10c1fc15e48653c91efde329a790f2eecfbbf2bd16003b5db2bab0/dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9", size = 1892, upload-time = "2025-02-19T22:15:01.647Z" },
-]
-
-[[package]]
 name = "filelock"
 version = "4.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -495,7 +484,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "ruff", specifier = ">=0.16.8" },
-    { name = "ual", git = "https://github.com/urban-air-lab/common" },
+    { name = "ual", git = "https://github.com/urban-air-lab/common?tag=0.19.0" },
 ]
 
 [[package]]
@@ -1199,10 +1188,9 @@ wheels = [
 
 [[package]]
 name = "ual"
-version = "0.18.0"
-source = { git = "https://github.com/urban-air-lab/common#347a47b973eb821a2b9d9cf3279d179064ca93af" }
+version = "0.19.0"
+source = { git = "https://github.com/urban-air-lab/common?tag=0.19.0#57bca12a2e6b114eafecbfd53991c17f82061a85" }
 dependencies = [
-    { name = "dotenv" },
     { name = "influxdb-client" },
     { name = "isort" },
     { name = "mypy" },
@@ -1211,6 +1199,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pip-audit" },
     { name = "pytest" },
+    { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "ruff" },
     { name = "scipy" },

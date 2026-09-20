@@ -18,8 +18,8 @@ dependencies = [
     "pyyaml>=6.0.3",
     "requests>=2.34.2",
     "ruff>=0.16.8",
-    "ual",
+    "ual>=0.19.0",
 ]
 
 [tool.uv.sources]
-ual = { git = "https://github.com/urban-air-lab/common" }
+ual = { git = "https://github.com/urban-air-lab/common", tag = "0.19.0" }
